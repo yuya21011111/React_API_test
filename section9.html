@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+
+<body>
+    <div id="app"></div>
+
+    <script type="text/babel">
+        const container = document.querySelector('#app')
+        const root = ReactDOM.createRoot(container)
+        const ApiTest = () => {
+            const useRef = React.useRef
+            const useState = React.useState
+
+            const keyword = useRef('')
+            const [searchResult, setSearchResult] = useState([])
+            const search = async keyword => {
+                const baseUrl = 'https://www.googleapis.com/books/v1/volumes?'
+                const params = { q: `intitle:${keyword.current.value}`, maxResults: 40, }
+                const queryParams = new URLSearchParams(params)
+               
+                const jsonUrl = baseUrl + queryParams
+
+                const response = await fetch(jsonUrl)
+                .then(response => response.json())
+                console.log(response.items)
+
+                const newList = [] // 空の配列
+                response.items.map( book => {
+                    const title = book.volumeInfo.title
+                    const img = book.volumeInfo.imageLinks 
+                    const description = book.volumeInfo.description
+                    newList.push({
+                        title: title ? title : 'タイトルはありません。',
+                        Image: img ? img.thumbnail: 'images/no_image.jpeg',
+                        description: description ? description.slice(0,40) : '無し'
+                    })
+                    console.log(newList)
+                    setSearchResult(newList)
+                } )
+            }
+            return (<>
+                <input type="text" ref={keyword} />
+                <button onClick={() => search(keyword)}>検索</button>
+            </>)
+        }
+        root.render(<>
+            <ApiTest />
+        </>)
+    </script>
+</body>
+
+</html>
