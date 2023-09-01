@@ -22,13 +22,48 @@
         const useEffect = React.useEffect
         const [books, setBooks] = useState([])
         const [newBook, setNewBook] = useState('')
+        const STORAGE_KEY = 'book'
+
+        // localStorageのデータをuseStateに持たせる
+        useEffect(() => {if(localStorage.getItem(STORAGE_KEY)){
+            try {
+                setBooks(JSON.parse(localStorage.getItem(STORAGE_KEY)))
+            } catch(e) {
+                console.log(e)
+            }
+        }},[])
+        
+        // 更新されたらlocalStorageに保存
+        useEffect(() => { localStorage.setItem(STORAGE_KEY,JSON.stringify(books)) },[books])
+
+        // 追加
+        const addBook = newBook => {
+            if(!newBook) return
+            setBooks([...books, newBook])
+
+            // 入力ボックスの空にする
+            setNewBook('')
+        }
+
+        // 削除
+        const removeBook = id => {
+            const newList = books.filter((book, index) => index !== id ? book: null)
+            setBooks(newList)
+        }
         
         return(<>
+          <ul>
+             { books.map( (book, index) =>  (
+                <li key={index}>{book}<button onClick={() => removeBook(index)}>削除</button></li>
+             )) }
+          </ul>
+          <input type="text" value={newBook} onChange={e => setNewBook(e.target.value)} />
+          <button onClick={() => addBook(newBook)}>追加</button>
 
         </>)
     }
     root.render(<>
-
+      <LocalStorageTest />
     </>)
    </script>
 </body>
